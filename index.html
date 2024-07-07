@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimatum Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Ultimatum Game</h1>
+    </header>
+    <main>
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <p>Welcome to the ultimatum game! You are going to play several rounds via a computer network with another partner. At the end of the entire game session, you will be ranked against others based on your overall performance.</p>
+            <p>There are four sets of games in total, a sum of money ($10/$100/$1,000/$10,000) will be divided between the two players. In each game set, there will be 10 rounds of games.
+                <br> <br> If the responder <b> ACCEPTS </b> the proposal, the money will be <b> split as proposed</b>.
+                <br> If the responder <b> REJECTS </b> the proposal, <b> NO ONE </b> will receive any money.
+                <br> Please only key in integer values. </p>
+        </section>
+         <section id="simulation">
+            <h2>Simulation</h2>
+            <div id="game">
+                <label for="player-name">Enter your name (initials): </label>
+                <input type="text" id="player-name">
+                <p id="round-info">Round: 1</p>
+                <button id="start-game">Start Game</button>
+                <div id="offer-section" style="display: none;">
+                    <label for="offer-amount">Enter your offer: </label>
+                    <input type="number" id="offer-amount" min="0" step="1">
+                    <button id="submit-offer">Submit Offer</button>
+                </div>
+                <p id="waiting-message" style="display: none;">Waiting for the responder to make a decision...</p>
+            </div>
+        </section>
+        <section id="results">
+            <h2>Results</h2>
+            <div id="results-display"></div>
+            <button id="export-results" style="display: none;">Export Results</button>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
