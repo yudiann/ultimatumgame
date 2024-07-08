@@ -8,6 +8,7 @@ function startGame() {
     currentRound = 0;
     results = [];
     document.getElementById('summary').style.display = 'none';
+    document.getElementById('roundResults').style.display = 'none';
     document.getElementById('game').style.display = 'block';
     startRound();
 }
@@ -29,6 +30,7 @@ function startRound() {
     document.getElementById('amount').innerText = amount;
     document.getElementById('offer').value = '';
     document.getElementById('result').innerText = '';
+    document.getElementById('waitingMessage').style.display = 'none';
 }
 
 function makeOffer() {
@@ -38,11 +40,19 @@ function makeOffer() {
         alert("Please enter a valid offer.");
         return;
     }
-    let response = getResponse(amount, offer);
-    document.getElementById('result').innerText = `Offer: $${offer}, Response: ${response ? 'Accepted' : 'Rejected'}`;
-    results.push({ gameSet: currentGameSet + 1, round: currentRound + 1, amount, offer, response });
-    currentRound++;
-    setTimeout(startRound, 3000);
+    document.getElementById('waitingMessage').style.display = 'block';
+    setTimeout(() => {
+        let response = getResponse(amount, offer);
+        let resultText = `Offer: $${offer}, Response: ${response ? 'Accepted' : 'Rejected'}`;
+        let userKeeps = response ? offer : 0;
+        let responderGets = response ? amount - offer : 0;
+        document.getElementById('result').innerText = resultText;
+        document.getElementById('waitingMessage').style.display = 'none';
+        results.push({ gameSet: currentGameSet + 1, round: currentRound + 1, amount, offer, response, userKeeps, responderGets });
+        displayRoundResults();
+        currentRound++;
+        setTimeout(startRound, 0);
+    }, Math.random() * 0 + 0); // 3-5 seconds delay
 }
 
 function getResponse(amount, offer) {
@@ -55,14 +65,38 @@ function getResponse(amount, offer) {
     return false;
 }
 
+function displayRoundResults() {
+    document.getElementById('roundResults').style.display = 'block';
+    let roundResultsList = document.getElementById('roundResultsList');
+    roundResultsList.innerHTML = '';
+    results.forEach(result => {
+        roundResultsList.innerHTML += `
+            <div>
+                <p>Game Set ${result.gameSet}, Round ${result.round}</p>
+                <p>Offer: $${result.offer}, Response: ${result.response ? 'Accepted' : 'Rejected'}</p>
+                <p>You: $${result.responderGets}, Your partner: $${result.userKeeps}</p>
+            </div>
+            <hr>
+        `;
+    });
+}
+
 function showSummary() {
     document.getElementById('game').style.display = 'none';
+    document.getElementById('roundResults').style.display = 'none';
     document.getElementById('summary').style.display = 'block';
     let summary = '';
     let totalScore = 0;
     results.forEach(result => {
-        summary += `Game Set ${result.gameSet}, Round ${result.round}: Offer $${result.offer}, Response: ${result.response ? 'Accepted' : 'Rejected'}<br>`;
-        if (result.response) totalScore += result.offer;
+        summary += `
+            <div>
+                <p>Game Set ${result.gameSet}, Round ${result.round}</p>
+                <p>Offer: $${result.offer}, Response: ${result.response ? 'Accepted' : 'Rejected'}</p>
+                <p>User Keeps: $${result.userKeeps}, Responder Gets: $${result.responderGets}</p>
+            </div>
+            <hr>
+        `;
+        if (result.response) totalScore += result.userKeeps;
     });
     summary += `<br><strong>Total Score: $${totalScore}</strong>`;
     document.getElementById('summaryResults').innerHTML = summary;
