@@ -11,3 +11,10 @@ body {
 #summary, #roundResults {
     display: none;
 }
+
+#roundResultsList div {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
