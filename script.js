@@ -1,146 +1,71 @@
-let currentRound = 1;
-let totalRounds = 5; 
-let totalScore = 0;
-let gameAmounts = [10, 100, 1000, 10000];
-let currentGameIndex = 0;
-let gameAmount = gameAmounts[currentGameIndex];
+let gameSets = [10, 100, 1000, 10000];
+let currentGameSet = 0;
+let currentRound = 0;
 let results = [];
 
-document.getElementById('start-game').addEventListener('click', startGame);
-document.getElementById('submit-offer').addEventListener('click', submitOffer);
-document.getElementById('export-results').addEventListener('click', exportResults);
-
-function resetGame() {
-        currentRound = 1;
-        totalScore = 0;
-        currentGameIndex = 0;
-        gameAmount = gameAmounts[currentGameIndex];
-        updateRoundInfo();
-        updateTotalScore();
-        document.getElementById('results-display').innerText = '';
-        document.getElementById('offer-section').style.display = 'none';
-        document.getElementById('start-game').style.display = 'block';
-        document.getElementById('export-results').style.display = 'none';
-        results = [];
-}
-
-function updateRoundInfo() {
-    document.getElementById('round-info').innerText = `Round: ${currentRound} (Amount: $${gameAmount})`;
-}
-
-function updateTotalScore() {
-    document.getElementById('total-score').innerText = `Total Score: ${totalScore}`;
-}
-
 function startGame() {
-    document.getElementById('start-game').style.display = 'none';
-    document.getElementById('offer-section').style.display = 'block';
-    updateRoundInfo();
-    updateTotalScore();
+    currentGameSet = 0;
+    currentRound = 0;
+    results = [];
+    document.getElementById('summary').style.display = 'none';
+    document.getElementById('game').style.display = 'block';
+    startRound();
 }
 
-function submitOffer() {
-    let offer = parseInt(document.getElementById('offer-amount').value);
-    let playerName = document.getElementById('player-name').value.trim();
-
-    if (playerName === "") {
-        alert('Please enter your name.');
+function startRound() {
+    if (currentGameSet >= gameSets.length) {
+        showSummary();
         return;
     }
-
-    if (isNaN(offer) || offer < 0 || offer > gameAmount) {
-        alert(`Invalid offer. Please enter a number between 0 and ${gameAmount}`);
+    if (currentRound >= 5) {
+        currentGameSet++;
+        currentRound = 0;
+        startRound();
         return;
     }
-
-    document.getElementById('offer-section').style.display = 'none';
-    document.getElementById('waiting-message').style.display = 'block';
-
-    // Simulate the responder taking 5-7 seconds before responding
-    setTimeout(() => {
-        let acceptance = computerDecision(offer, gameAmount);
-
-        let resultMessage;
-        if (acceptance) {
-            resultMessage = `Round ${currentRound}: Offer accepted. You get $${gameAmount - offer}, Responder gets $${offer}.`;
-            totalScore += (gameAmount - offer);
-        } else {
-            resultMessage = `Round ${currentRound}: Offer rejected. Both players get $0.`;
-        }
-
-        results.push({
-            player: playerName,
-            round: currentRound,
-            gameAmount: gameAmount,
-            offer: offer,
-            accepted: acceptance,
-            playerEarnings: acceptance ? gameAmount - offer : 0,
-            responderEarnings: acceptance ? offer : 0
-        });
-
-        displayResults(resultMessage);
-
-        currentRound++;
-        document.getElementById('waiting-message').style.display = 'none';
-
-        // Check if current game rounds are completed
-        if (currentRound > totalRounds) {
-            currentGameIndex++;
-            if (currentGameIndex < gameAmounts.length) {
-                gameAmount = gameAmounts[currentGameIndex];
-                currentRound = 1;
-                updateRoundInfo();
-                updateTotalScore();
-                document.getElementById('offer-section').style.display = 'block';
-            } else {
-                alert(`All games completed! Your total score is $${totalScore}.`);
-                document.getElementById('export-results').style.display = 'block';
-            }
-        } else {
-            updateRoundInfo();
-            document.getElementById('offer-section').style.display = 'block';
-        }
-
-    }, (Math.random() * 0) * 1000); // Delay between 5 to 7 seconds
+    let amount = gameSets[currentGameSet];
+    document.getElementById('gameSet').innerText = currentGameSet + 1;
+    document.getElementById('round').innerText = currentRound + 1;
+    document.getElementById('amount').innerText = amount;
+    document.getElementById('offer').value = '';
+    document.getElementById('result').innerText = '';
 }
 
-function computerDecision(offer, totalAmount) {
-    if (offer >= totalAmount * 0.5) {
-        return true;
+function makeOffer() {
+    let amount = gameSets[currentGameSet];
+    let offer = parseInt(document.getElementById('offer').value);
+    if (isNaN(offer) || offer < 0 || offer > amount) {
+        alert("Please enter a valid offer.");
+        return;
     }
+    let response = getResponse(amount, offer);
+    document.getElementById('result').innerText = `Offer: $${offer}, Response: ${response ? 'Accepted' : 'Rejected'}`;
+    results.push({ gameSet: currentGameSet + 1, round: currentRound + 1, amount, offer, response });
+    currentRound++;
+    setTimeout(startRound, 3000);
+}
 
-    const acceptanceThresholds = [
-        { threshold: totalAmount * 0.4, probability: 0.4 },
-        { threshold: totalAmount * 0.3, probability: 0.3 },
-        { threshold: totalAmount * 0.2, probability: 0.2 },
-        { threshold: totalAmount * 0.1, probability: 0.1 }
-    ];
-
-    for (let i = 0; i < acceptanceThresholds.length; i++) {
-        if (offer >= acceptanceThresholds[i].threshold) {
-            return Math.random() < acceptanceThresholds[i].probability;
-        }
-    }
+function getResponse(amount, offer) {
+    let percentage = (offer / amount) * 100;
+    if (percentage >= 50) return true;
+    if (percentage >= 40 && Math.random() <= 0.4) return true;
+    if (percentage >= 30 && Math.random() <= 0.3) return true;
+    if (percentage >= 20 && Math.random() <= 0.2) return true;
+    if (percentage >= 10 && Math.random() <= 0.1) return true;
     return false;
 }
 
-function displayResults(result) {
-    document.getElementById('results-display').innerText += `${result}\n`;
-}
-
-function exportResults() {
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Player,Round,Game Amount,Offer,Accepted,Player Earnings,Responder Earnings\n";
+function showSummary() {
+    document.getElementById('game').style.display = 'none';
+    document.getElementById('summary').style.display = 'block';
+    let summary = '';
+    let totalScore = 0;
     results.forEach(result => {
-        let row = `${result.player},${result.round},${result.gameAmount},${result.offer},${result.accepted},${result.playerEarnings},${result.responderEarnings}`;
-        csvContent += row + "\n";
+        summary += `Game Set ${result.gameSet}, Round ${result.round}: Offer $${result.offer}, Response: ${result.response ? 'Accepted' : 'Rejected'}<br>`;
+        if (result.response) totalScore += result.offer;
     });
-
-    let encodedUri = encodeURI(csvContent);
-    let link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "ultimatum_game_results.csv");
-    document.body.appendChild(link);
-
-    link.click();
+    summary += `<br><strong>Total Score: $${totalScore}</strong>`;
+    document.getElementById('summaryResults').innerHTML = summary;
 }
+
+startGame();
