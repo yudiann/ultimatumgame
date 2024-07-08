@@ -100,7 +100,7 @@ function submitOffer() {
             document.getElementById('offer-section').style.display = 'block';
         }
 
-    }, (Math.random() * 2 + 5) * 1000); // Delay between 5 to 7 seconds
+    }, (Math.random() * 0) * 1000); // Delay between 5 to 7 seconds
 }
 
 function computerDecision(offer, totalAmount) {
