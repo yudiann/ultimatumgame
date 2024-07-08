@@ -1,5 +1,5 @@
 let currentRound = 1;
-let totalRounds = 5; // Total rounds per game
+let totalRounds = 5; 
 let totalScore = 0;
 let gameAmounts = [10, 100, 1000, 10000];
 let currentGameIndex = 0;
@@ -45,13 +45,11 @@ function submitOffer() {
 
     if (playerName === "") {
         alert('Please enter your name.');
-        document.getElementById('offer-section').style.display = 'block';
         return;
     }
 
     if (isNaN(offer) || offer < 0 || offer > gameAmount) {
         alert(`Invalid offer. Please enter a number between 0 and ${gameAmount}`);
-        document.getElementById('offer-section').style.display = 'block';
         return;
     }
 
