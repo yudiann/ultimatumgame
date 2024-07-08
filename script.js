@@ -1,5 +1,5 @@
 let currentRound = 1;
-let totalRounds = 10;
+let totalRounds = 5;
 let totalScore = 0;
 let gameAmounts = [10, 100, 1000, 10000];
 let currentGameIndex = 0;
