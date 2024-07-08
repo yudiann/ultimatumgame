@@ -35,28 +35,25 @@ function startRound() {
 
 function makeOffer() {
     let amount = gameSets[currentGameSet];
-    let offer = parseInt(document.getElementById('offer').value);
-    if (isNaN(offer) || offer < 0 || offer > amount) {
-        alert("Please enter a valid offer.");
+    let partnerAmount = parseInt(document.getElementById('offer').value);
+    if (isNaN(partnerAmount) || partnerAmount < 0 || partnerAmount > amount) {
+        alert("Please enter a valid amount for your partner.");
         return;
     }
     document.getElementById('waitingMessage').style.display = 'block';
     setTimeout(() => {
-        let response = getResponse(amount, offer);
-        let resultText = `Offer: $${offer}, Response: ${response ? 'Accepted' : 'Rejected'}`;
-        let userKeeps = response ? offer : 0;
-        let responderGets = response ? amount - offer : 0;
-        document.getElementById('result').innerText = resultText;
-        document.getElementById('waitingMessage').style.display = 'none';
-        results.push({ gameSet: currentGameSet + 1, round: currentRound + 1, amount, offer, response, userKeeps, responderGets });
+        let response = getResponse(amount, partnerAmount);
+        let you = response ? amount - partnerAmount : 0;
+        let yourPartner = response ? partnerAmount : 0;
+        results.push({ gameSet: currentGameSet + 1, round: currentRound + 1, amount, partnerAmount, response, you, yourPartner });
         displayRoundResults();
         currentRound++;
         setTimeout(startRound, 0);
     }, Math.random() * 0 + 0); // 3-5 seconds delay
 }
 
-function getResponse(amount, offer) {
-    let percentage = (offer / amount) * 100;
+function getResponse(amount, partnerAmount) {
+    let percentage = (partnerAmount / amount) * 100;
     if (percentage >= 50) return true;
     if (percentage >= 40 && Math.random() <= 0.4) return true;
     if (percentage >= 30 && Math.random() <= 0.3) return true;
@@ -70,14 +67,15 @@ function displayRoundResults() {
     let roundResultsList = document.getElementById('roundResultsList');
     roundResultsList.innerHTML = '';
     results.forEach(result => {
-        roundResultsList.innerHTML += `
-            <div>
-                <p>Game Set ${result.gameSet}, Round ${result.round}</p>
-                <p>Offer: $${result.offer}, Response: ${result.response ? 'Accepted' : 'Rejected'}</p>
-                <p>You: $${result.responderGets}, Your partner: $${result.userKeeps}</p>
-            </div>
-            <hr>
-        `;
+        let resultText = `Game Set ${result.gameSet}, Round ${result.round}: `;
+        resultText += `Partner's Amount: $${result.partnerAmount}, `;
+        resultText += `Response: ${result.response ? 'Accepted' : 'Rejected'}, `;
+        resultText += `You: $${result.you}, `;
+        resultText += `Your Partner: $${result.yourPartner}`;
+
+        let resultDiv = document.createElement('div');
+        resultDiv.innerText = resultText;
+        roundResultsList.appendChild(resultDiv);
     });
 }
 
@@ -88,15 +86,14 @@ function showSummary() {
     let summary = '';
     let totalScore = 0;
     results.forEach(result => {
-        summary += `
-            <div>
-                <p>Game Set ${result.gameSet}, Round ${result.round}</p>
-                <p>Offer: $${result.offer}, Response: ${result.response ? 'Accepted' : 'Rejected'}</p>
-                <p>User Keeps: $${result.userKeeps}, Responder Gets: $${result.responderGets}</p>
-            </div>
-            <hr>
-        `;
-        if (result.response) totalScore += result.userKeeps;
+        let resultText = `Game Set ${result.gameSet}, Round ${result.round}: `;
+        resultText += `Partner's Amount: $${result.partnerAmount}, `;
+        resultText += `Response: ${result.response ? 'Accepted' : 'Rejected'}, `;
+        resultText += `You: $${result.you}, `;
+        resultText += `Your Partner: $${result.yourPartner}`;
+
+        summary += `<div>${resultText}</div><hr>`;
+        if (result.response) totalScore += result.you;
     });
     summary += `<br><strong>Total Score: $${totalScore}</strong>`;
     document.getElementById('summaryResults').innerHTML = summary;
